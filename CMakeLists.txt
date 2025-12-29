@@ -43,29 +43,33 @@ find_package(Python3 COMPONENTS Interpreter Development)
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/dependency.cmake)
 
 set(CROSS_COMPILE riscv64-unknown-elf-)
-set(CMAKE_ASM_COMPILER ${CROSS_COMPILE}gcc)
-set(CMAKE_AR ${CROSS_COMPILE}ar)
-set(CMAKE_ASM_COMPILER ${CROSS_COMPILE}gcc)
-set(CMAKE_C_COMPILER ${CROSS_COMPILE}gcc)
-set(CMAKE_CXX_COMPILER ${CROSS_COMPILE}g++)
+set(CMAKE_ASM_COMPILER  ${CROSS_COMPILE}gcc)
+set(CMAKE_AR            ${CROSS_COMPILE}ar)
+set(CMAKE_ASM_COMPILER  ${CROSS_COMPILE}gcc)
+set(CMAKE_C_COMPILER    ${CROSS_COMPILE}gcc)
+set(CMAKE_CXX_COMPILER  ${CROSS_COMPILE}g++)
 
 enable_language(ASM)
 
-set(CC_OPTS "-static \
-            -mcmodel=medany \
-            -fvisibility=hidden \
-            -nostdlib \
-            -nostartfiles \
-            -Os \
-            -Wl,--gc-sections")
+set(ARCH_FLAGS -march=rv32i -mabi=ilp32 -mcmodel=medany)
+set(COMMON_OPTS -Os -static -fvisibility=hidden)
+add_compile_options(${ARCH_FLAGS} ${COMMON_OPTS})
 
 set(LD_SCRIPT ${CMAKE_CURRENT_LIST_DIR}/link.ld)
 
-set(SOURCES dummy.c am_map.c doomdef.c doomstat.c dstrings.c d_event.c d_items.c d_iwad.c d_loop.c d_main.c d_mode.c d_net.c f_finale.c f_wipe.c g_game.c hu_lib.c hu_stuff.c info.c i_cdmus.c i_endoom.c i_joystick.c i_scale.c i_sound.c i_system.c i_timer.c memio.c m_argv.c m_bbox.c m_cheat.c m_config.c m_controls.c m_fixed.c m_menu.c m_misc.c m_random.c p_ceilng.c p_doors.c p_enemy.c p_floor.c p_inter.c p_lights.c p_map.c p_maputl.c p_mobj.c p_plats.c p_pspr.c p_saveg.c p_setup.c p_sight.c p_spec.c p_switch.c p_telept.c p_tick.c p_user.c r_bsp.c r_data.c r_draw.c r_main.c r_plane.c r_segs.c r_sky.c r_things.c sha1.c sounds.c statdump.c st_lib.c st_stuff.c s_sound.c tables.c v_video.c wi_stuff.c w_checksum.c w_file.c w_main.c w_wad.c z_zone.c w_file_stdc.c i_input.c i_video.c doomgeneric.c doomgeneric_ecap5.c)
-list(TRANSFORM SOURCES PREPEND "${CMAKE_CURRENT_LIST_DIR}/src/")
+set(INC_DIRS src src/core src/display src/game src/net src/render src/system src/wad)
+list(TRANSFORM INC_DIRS PREPEND "${CMAKE_CURRENT_LIST_DIR}/")
+file(GLOB_RECURSE SOURCES "src/*.c")
 
 add_executable(doom.elf ${SOURCES})
-set_target_properties(doom.elf 
-  PROPERTIES COMPILE_FLAGS "${CC_OPTS} -march=rv32g -mabi=ilp32"
-  LINK_FLAGS "${CC_OPTS} -march=rv32g -mabi=ilp32 -T${LD_SCRIPT}")
-target_link_libraries(doom.elf gcc)
+target_include_directories(doom.elf PRIVATE ${INC_DIRS})
+target_link_options(doom.elf PRIVATE
+  ${ARCH_FLAGS}
+  "-T${LD_SCRIPT}"
+  "-nostartfiles"
+  "--specs=nano.specs"
+  "-nodefaultlibs"
+  "-Wl,--gc-sections"
+  "-Wl,-Map=${CMAKE_CURRENT_BINARY_DIR}/doom.map"
+)
+target_link_libraries(doom.elf c m gcc)

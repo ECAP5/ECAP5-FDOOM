@@ -1,0 +1,14 @@
+void mkdir() {}
+void _exit() {}
+void _close() {}
+void _lseek() {}
+void _open() {}
+void _read() {}
+void _sbrk() {}
+void _unlink() {}
+void _write() {}
+void _fstat() {}
+void _isatty() {}
+void _link() {}
+void _kill() {}
+void _getpid() {}

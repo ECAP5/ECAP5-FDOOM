@@ -38,12 +38,12 @@
 
 #include "m_fixed.h"
 	
-#define FINEANGLES		8192
+#define FINEANGLES		2048
 #define FINEMASK		(FINEANGLES-1)
 
 
 // 0x100000000 to 0x2000
-#define ANGLETOFINESHIFT	19		
+#define ANGLETOFINESHIFT	15
 
 // Effective size is 10240.
 extern const fixed_t finesine[5*FINEANGLES/4];

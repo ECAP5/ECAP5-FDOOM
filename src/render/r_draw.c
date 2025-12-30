@@ -38,11 +38,13 @@
 
 
 // ?
-#define MAXWIDTH			1120
-#define MAXHEIGHT			832
+//#define MAXWIDTH			1120
+//#define MAXHEIGHT			832
+#define MAXWIDTH			560
+#define MAXHEIGHT			416
 
 // status bar height at bottom of screen
-#define SBARHEIGHT		32
+#define SBARHEIGHT		16
 
 //
 // All drawing to the view buffer is accomplished in this file.

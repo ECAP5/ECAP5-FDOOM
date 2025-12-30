@@ -93,7 +93,7 @@ static void ExtendLumpInfo(int newnumlumps)
 
     if (newlumpinfo == NULL)
     {
-	I_Error ("Couldn't realloc lumpinfo");
+      I_Error ("Couldn't realloc lumpinfo");
     }
 
     // Copy over lumpinfo_t structures from the old array. If any of
@@ -108,13 +108,13 @@ static void ExtendLumpInfo(int newnumlumps)
             Z_ChangeUser(newlumpinfo[i].cache, &newlumpinfo[i].cache);
         }
 
-        // We shouldn't be generating a hash table until after all WADs have
-        // been loaded, but just in case...
-        if (lumpinfo[i].next != NULL)
-        {
-            int nextlumpnum = lumpinfo[i].next - lumpinfo;
-            newlumpinfo[i].next = &newlumpinfo[nextlumpnum];
-        }
+      //  // We shouldn't be generating a hash table until after all WADs have
+      //  // been loaded, but just in case...
+      //  if (lumpinfo[i].next != NULL)
+      //  {
+      //      int nextlumpnum = lumpinfo[i].next - lumpinfo;
+      //      newlumpinfo[i].next = &newlumpinfo[nextlumpnum];
+      //  }
     }
 
     // All done.
@@ -260,24 +260,24 @@ int W_CheckNumForName (char* name)
 
     // Do we have a hash table yet?
 
-    if (lumphash != NULL)
-    {
-        int hash;
-        
-        // We do! Excellent.
-
-        hash = W_LumpNameHash(name) % numlumps;
-        
-        for (lump_p = lumphash[hash]; lump_p != NULL; lump_p = lump_p->next)
-        {
-            if (!strncasecmp(lump_p->name, name, 8))
-            {
-                return lump_p - lumpinfo;
-            }
-        }
-    } 
-    else
-    {
+//    if (lumphash != NULL)
+//    {
+//        int hash;
+//        
+//        // We do! Excellent.
+//
+//        hash = W_LumpNameHash(name) % numlumps;
+//        
+//        for (lump_p = lumphash[hash]; lump_p != NULL; lump_p = lump_p->next)
+//        {
+//            if (!strncasecmp(lump_p->name, name, 8))
+//            {
+//                return lump_p - lumpinfo;
+//            }
+//        }
+//    } 
+//    else
+//    {
         // We don't have a hash table generate yet. Linear search :-(
         // 
         // scan backwards so patch lump files take precedence
@@ -289,7 +289,7 @@ int W_CheckNumForName (char* name)
                 return i;
             }
         }
-    }
+//    }
 
     // TFB. Not found.
 
@@ -305,6 +305,19 @@ int W_CheckNumForName (char* name)
 //
 int W_GetNumForName (char* name)
 {
+//    printf("--- Diagnostic du Répertoire WAD ---\n");
+//    printf("Nombre de Lumps detectes : %d\n", numlumps);
+//
+//    for(int i = 0; i < numlumps; i++) {
+//        // On affiche l'index, le nom (8 caractères max) et l'offset
+//        char name[9];
+//        strncpy(name, lumpinfo[i].name, 8);
+//        name[8] = '\0';
+//        
+//        printf("Lump [%d] : %s | Offset: 0x%08x | Size: %d\n", 
+//                i, name, lumpinfo[i].position, lumpinfo[i].size);
+//    }
+//
     int	i;
 
     i = W_CheckNumForName (name);
@@ -536,38 +549,38 @@ void W_Profile (void)
 
 // Generate a hash table for fast lookups
 
-void W_GenerateHashTable(void)
-{
-    unsigned int i;
-
-    // Free the old hash table, if there is one
-
-    if (lumphash != NULL)
-    {
-        Z_Free(lumphash);
-    }
-
-    // Generate hash table
-    if (numlumps > 0)
-    {
-        lumphash = Z_Malloc(sizeof(lumpinfo_t *) * numlumps, PU_STATIC, NULL);
-        memset(lumphash, 0, sizeof(lumpinfo_t *) * numlumps);
-
-        for (i=0; i<numlumps; ++i)
-        {
-            unsigned int hash;
-
-            hash = W_LumpNameHash(lumpinfo[i].name) % numlumps;
-
-            // Hook into the hash table
-
-            lumpinfo[i].next = lumphash[hash];
-            lumphash[hash] = &lumpinfo[i];
-        }
-    }
-
-    // All done!
-}
+//void W_GenerateHashTable(void)
+//{
+//    unsigned int i;
+//
+//    // Free the old hash table, if there is one
+//
+//    if (lumphash != NULL)
+//    {
+//        Z_Free(lumphash);
+//    }
+//
+//    // Generate hash table
+//    if (numlumps > 0)
+//    {
+//        lumphash = Z_Malloc(sizeof(lumpinfo_t *) * numlumps, PU_STATIC, NULL);
+//        memset(lumphash, 0, sizeof(lumpinfo_t *) * numlumps);
+//
+//        for (i=0; i<numlumps; ++i)
+//        {
+//            unsigned int hash;
+//
+//            hash = W_LumpNameHash(lumpinfo[i].name) % numlumps;
+//
+//            // Hook into the hash table
+//
+//            lumpinfo[i].next = lumphash[hash];
+//            lumphash[hash] = &lumpinfo[i];
+//        }
+//    }
+//
+//    // All done!
+//}
 
 // Lump names that are unique to particular game types. This lets us check
 // the user is not trying to play with the wrong executable, eg.

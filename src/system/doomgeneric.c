@@ -13,15 +13,14 @@ void D_DoomMain (void);
 void doomgeneric_Create(int argc, char **argv)
 {
 	// save arguments
-    myargc = argc;
-    myargv = argv;
+  myargc = argc;
+  myargv = argv;
 
-	M_FindResponseFile();
-
-	DG_ScreenBuffer = malloc(DOOMGENERIC_RESX * DOOMGENERIC_RESY * 4);
+  // Allocate the screen buffer
+	DG_ScreenBuffer = malloc(DOOMGENERIC_RESX * DOOMGENERIC_RESY);
 
 	DG_Init();
 
-	D_DoomMain ();
+	D_DoomMain();
 }
 

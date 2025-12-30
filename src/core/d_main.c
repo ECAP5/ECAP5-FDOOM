@@ -52,9 +52,10 @@
 #include "m_menu.h"
 #include "p_saveg.h"
 
-#include "i_endoom.h"
 #include "i_joystick.h"
 #include "i_system.h"
+#include "i_sound.h"
+#include "i_endoom.h"
 #include "i_timer.h"
 #include "i_video.h"
 
@@ -190,9 +191,9 @@ void D_Display (void)
     // change the view size if needed
     if (setsizeneeded)
     {
-		R_ExecuteSetViewSize ();
-		oldgamestate = -1;                      // force background redraw
-		borderdrawcount = 3;
+      R_ExecuteSetViewSize ();
+      oldgamestate = -1;                      // force background redraw
+      borderdrawcount = 3;
     }
 
     // save the current screen if about to wipe
@@ -206,7 +207,7 @@ void D_Display (void)
 
     if (gamestate == GS_LEVEL && gametic)
     	HU_Erase();
-    
+
     // do buffered drawing
     switch (gamestate)
     {
@@ -235,17 +236,17 @@ void D_Display (void)
 		D_PageDrawer ();
 		break;
     }
-    
+
     // draw buffered stuff to screen
     I_UpdateNoBlit ();
-    
+
     // draw the view directly
     if (gamestate == GS_LEVEL && !automapactive && gametic)
     	R_RenderPlayerView (&players[displayplayer]);
 
     if (gamestate == GS_LEVEL && gametic)
     	HU_Drawer ();
-    
+
     // clean up border stuff
     if (gamestate != oldgamestate && gamestate != GS_LEVEL)
     	I_SetPalette (W_CacheLumpName (DEH_String("PLAYPAL"),PU_CACHE));
@@ -280,7 +281,7 @@ void D_Display (void)
     viewactivestate = viewactive;
     inhelpscreensstate = inhelpscreens;
     oldgamestate = wipegamestate = gamestate;
-    
+
     // draw pause pic
     if (paused)
     {
@@ -292,40 +293,40 @@ void D_Display (void)
 							  W_CacheLumpName (DEH_String("M_PAUSE"), PU_CACHE));
     }
 
-
     // menus go directly to the screen
     M_Drawer ();          // menu is drawn even on top of everything
     NetUpdate ();         // send out any new accumulation
 
-
     // normal update
     if (!wipe)
     {
-	I_FinishUpdate ();              // page flip or blit buffer
-	return;
+      I_FinishUpdate ();              // page flip or blit buffer
+      return;
     }
-    
+
     // wipe update
-    wipe_EndScreen(0, 0, SCREENWIDTH, SCREENHEIGHT);
+    //wipe_EndScreen(0, 0, SCREENWIDTH, SCREENHEIGHT);
 
     wipestart = I_GetTime () - 1;
 
-    do
-    {
-	do
-	{
-	    nowtime = I_GetTime ();
-	    tics = nowtime - wipestart;
-            I_Sleep(1);
-	} while (tics <= 0);
-        
-	wipestart = nowtime;
-	done = wipe_ScreenWipe(wipe_Melt
-			       , 0, 0, SCREENWIDTH, SCREENHEIGHT, tics);
-	I_UpdateNoBlit ();
-	M_Drawer ();                            // menu is drawn even on top of wipes
-	I_FinishUpdate ();                      // page flip or blit buffer
-    } while (!done);
+   // do
+   // {
+   //   do
+   //   {
+   //       nowtime = I_GetTime ();
+   //       tics = nowtime - wipestart;
+   //             I_Sleep(1);
+   //   } while (tics <= 0);
+
+   //   printf("PON13\n");
+   //         
+   //   wipestart = nowtime;
+   //   done = wipe_ScreenWipe(wipe_Melt
+   //              , 0, 0, SCREENWIDTH, SCREENHEIGHT, tics);
+   //   I_UpdateNoBlit ();
+   //   M_Drawer ();                            // menu is drawn even on top of wipes
+   //   I_FinishUpdate ();                      // page flip or blit buffer
+   // } while (!done);
 }
 
 //
@@ -408,9 +409,9 @@ void doomgeneric_Tick()
     I_StartFrame ();
 
     TryRunTics (); // will run at least one tic
-
+                   //
     S_UpdateSounds (players[consoleplayer].mo);// move positional sounds
-
+                                               //
     // Update display, next frame, with current state.
     if (screenvisible)
     {
@@ -423,17 +424,8 @@ void doomgeneric_Tick()
 //
 void D_DoomLoop (void)
 {
-    if (bfgedition &&
-        (demorecording || (gameaction == ga_playdemo) || netgame))
-    {
-        printf(" WARNING: You are playing using one of the Doom Classic\n"
-               " IWAD files shipped with the Doom 3: BFG Edition. These are\n"
-               " known to be incompatible with the regular IWAD files and\n"
-               " may cause demos and network games to get out of sync.\n");
-    }
-
-    if (demorecording)
-    	G_BeginRecording ();
+    //if (demorecording)
+    //	G_BeginRecording ();
 
     main_loop_started = true;
 
@@ -1169,6 +1161,8 @@ void D_DoomMain (void)
     int numiwadlumps;
 #endif
 
+    setvbuf(stdout, NULL, _IONBF, 0);
+
     I_AtExit(D_Endoom, false);
 
     // print banner
@@ -1243,7 +1237,7 @@ void D_DoomMain (void)
     // Disable monsters.
     //
 	
-    nomonsters = M_CheckParm ("-nomonsters");
+    nomonsters = 0;
 
     //!
     // @vanilla
@@ -1251,7 +1245,7 @@ void D_DoomMain (void)
     // Monsters respawn after being killed.
     //
 
-    respawnparm = M_CheckParm ("-respawn");
+    respawnparm = 1;
 
     //!
     // @vanilla
@@ -1259,7 +1253,7 @@ void D_DoomMain (void)
     // Monsters move faster.
     //
 
-    fastparm = M_CheckParm ("-fast");
+    fastparm = 0;
 
     //! 
     // @vanilla
@@ -1268,7 +1262,7 @@ void D_DoomMain (void)
     // directory.
     //
 
-    devparm = M_CheckParm ("-devparm");
+    devparm = 0;
 
     I_DisplayFPSDots(devparm);
 
@@ -1279,8 +1273,8 @@ void D_DoomMain (void)
     // Start a deathmatch game.
     //
 
-    if (M_CheckParm ("-deathmatch"))
-	deathmatch = 1;
+//    if (M_CheckParm ("-deathmatch"))
+//	deathmatch = 1;
 
     //!
     // @category net
@@ -1290,8 +1284,8 @@ void D_DoomMain (void)
     // all items respawn after 30 seconds.
     //
 
-    if (M_CheckParm ("-altdeath"))
-	deathmatch = 2;
+//    if (M_CheckParm ("-altdeath"))
+//	deathmatch = 2;
 
     if (devparm)
 	DEH_printf(D_DEVSTR);
@@ -1330,37 +1324,37 @@ void D_DoomMain (void)
     // x defaults to 200.  Values are rounded up to 10 and down to 400.
     //
 
-    if ( (p=M_CheckParm ("-turbo")) )
-    {
-	int     scale = 200;
-	extern int forwardmove[2];
-	extern int sidemove[2];
-	
-	if (p<myargc-1)
-	    scale = atoi (myargv[p+1]);
-	if (scale < 10)
-	    scale = 10;
-	if (scale > 400)
-	    scale = 400;
-        DEH_printf("turbo scale: %i%%\n", scale);
-	forwardmove[0] = forwardmove[0]*scale/100;
-	forwardmove[1] = forwardmove[1]*scale/100;
-	sidemove[0] = sidemove[0]*scale/100;
-	sidemove[1] = sidemove[1]*scale/100;
-    }
+//    if ( (p=M_CheckParm ("-turbo")) )
+//    {
+//	int     scale = 200;
+//	extern int forwardmove[2];
+//	extern int sidemove[2];
+//	
+//	if (p<myargc-1)
+//	    scale = atoi (myargv[p+1]);
+//	if (scale < 10)
+//	    scale = 10;
+//	if (scale > 400)
+//	    scale = 400;
+//        DEH_printf("turbo scale: %i%%\n", scale);
+//	forwardmove[0] = forwardmove[0]*scale/100;
+//	forwardmove[1] = forwardmove[1]*scale/100;
+//	sidemove[0] = sidemove[0]*scale/100;
+//	sidemove[1] = sidemove[1]*scale/100;
+//    }
     
     // init subsystems
     DEH_printf("V_Init: allocate screens.\n");
     V_Init ();
 
     // Load configuration files before initialising other subsystems.
-    DEH_printf("M_LoadDefaults: Load system defaults.\n");
-    M_SetConfigFilenames("default.cfg", PROGRAM_PREFIX "doom.cfg");
-    D_BindVariables();
-    M_LoadDefaults();
+//    DEH_printf("M_LoadDefaults: Load system defaults.\n");
+//    M_SetConfigFilenames("default.cfg", PROGRAM_PREFIX "doom.cfg");
+//    D_BindVariables();
+//    M_LoadDefaults();
 
     // Save configuration at exit.
-    I_AtExit(M_SaveDefaults, false);
+//    I_AtExit(M_SaveDefaults, false);
 
     // Find main IWAD file and load it.
     iwadfile = D_FindIWAD(IWAD_MASK_DOOM, &gamemission);
@@ -1513,7 +1507,7 @@ void D_DoomMain (void)
     I_AtExit((atexit_func_t) G_CheckDemoStatus, true);
 
     // Generate the WAD hash table.  Speed things up a bit.
-    W_GenerateHashTable();
+//    W_GenerateHashTable();
 
     // Load DEHACKED lumps from WAD files - but only if we give the right
     // command line parameter.
@@ -1834,12 +1828,14 @@ void D_DoomMain (void)
 
     if (gameaction != ga_loadgame )
     {
-		if (autostart || netgame)
-			G_InitNew (startskill, startepisode, startmap);
-		else
-			D_StartTitle ();                // start up intro loop
+      if (autostart || netgame) {
+        G_InitNew (startskill, startepisode, startmap);
+      }else {
+        D_StartTitle ();                // start up intro loop
+      }
     }
 
     D_DoomLoop ();
+
 }
 

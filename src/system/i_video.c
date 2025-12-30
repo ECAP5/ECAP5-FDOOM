@@ -170,9 +170,6 @@ void cmap_to_fb(uint8_t *out, uint8_t *in, int in_pixels)
                          ((c.g & 0xFC) << 3) |
                          (c.b >> 3);
 
-#ifdef SYS_BIG_ENDIAN
-            p = swapeLE16(p); // can't use SHORT() because this needs to stay unsigned
-#endif
             for (k = 0; k < fb_scaling; k++) {
                 *(uint16_t *)out = p;
                 out += 2;
@@ -193,7 +190,17 @@ void cmap_to_fb(uint8_t *out, uint8_t *in, int in_pixels)
                 out += 4;
             }
         }
-        else {
+        else if (s_Fb.bits_per_pixel == 8) {
+            uint8_t p = ((c.r & 0x3) << s_Fb.red.offset) |
+                        ((c.g & 0x3) << s_Fb.green.offset) |
+                        ((c.b & 0x3) << s_Fb.blue.offset) |
+                        (c.a & 0x3);
+
+            for (k = 0; k < fb_scaling; k++) {
+                *(uint8_t *)out = p;
+                out += 1;
+            }
+        } else {
             // no clue how to convert this
             I_Error("No idea how to convert %d bpp pixels", s_Fb.bits_per_pixel);
         }
@@ -219,47 +226,59 @@ void I_InitGraphics (void)
 
 #else  // CMAP256
 
-	gfxmodeparm = M_CheckParmWithArgs("-gfxmode", 1);
+//	gfxmodeparm = M_CheckParmWithArgs("-gfxmode", 1);
+//
+//	if (gfxmodeparm) {
+//		mode = myargv[gfxmodeparm + 1];
+//	}
+//	else {
+//		// default to rgba8888 like the old behavior, for compatibility
+//		// maybe could warn here?
+//		mode = "rgba8888";
+//	}
+//
+//	if (strcmp(mode, "rgba8888") == 0) {
+//		// default mode
+//		s_Fb.bits_per_pixel = 32;
+//
+//		s_Fb.blue.length = 8;
+//		s_Fb.green.length = 8;
+//		s_Fb.red.length = 8;
+//		s_Fb.transp.length = 8;
+//
+//		s_Fb.blue.offset = 0;
+//		s_Fb.green.offset = 8;
+//		s_Fb.red.offset = 16;
+//		s_Fb.transp.offset = 24;
+//	}
+//
+//	else if (strcmp(mode, "rgb565") == 0) {
+//		s_Fb.bits_per_pixel = 16;
+//
+//		s_Fb.blue.length = 5;
+//		s_Fb.green.length = 6;
+//		s_Fb.red.length = 5;
+//		s_Fb.transp.length = 0;
+//
+//		s_Fb.blue.offset = 11;
+//		s_Fb.green.offset = 5;
+//		s_Fb.red.offset = 0;
+//		s_Fb.transp.offset = 16;
+//	}
+//	else
+//		I_Error("Unknown gfxmode value: %s\n", mode);
 
-	if (gfxmodeparm) {
-		mode = myargv[gfxmodeparm + 1];
-	}
-	else {
-		// default to rgba8888 like the old behavior, for compatibility
-		// maybe could warn here?
-		mode = "rgba8888";
-	}
+		s_Fb.bits_per_pixel = 8;
 
-	if (strcmp(mode, "rgba8888") == 0) {
-		// default mode
-		s_Fb.bits_per_pixel = 32;
+		s_Fb.blue.length = 2;
+		s_Fb.green.length = 2;
+		s_Fb.red.length = 2;
+		s_Fb.transp.length = 2;
 
-		s_Fb.blue.length = 8;
-		s_Fb.green.length = 8;
-		s_Fb.red.length = 8;
-		s_Fb.transp.length = 8;
-
-		s_Fb.blue.offset = 0;
-		s_Fb.green.offset = 8;
-		s_Fb.red.offset = 16;
-		s_Fb.transp.offset = 24;
-	}
-
-	else if (strcmp(mode, "rgb565") == 0) {
-		s_Fb.bits_per_pixel = 16;
-
-		s_Fb.blue.length = 5;
-		s_Fb.green.length = 6;
-		s_Fb.red.length = 5;
-		s_Fb.transp.length = 0;
-
-		s_Fb.blue.offset = 11;
-		s_Fb.green.offset = 5;
+		s_Fb.blue.offset = 4;
+		s_Fb.green.offset = 2;
 		s_Fb.red.offset = 0;
-		s_Fb.transp.offset = 16;
-	}
-	else
-		I_Error("Unknown gfxmode value: %s\n", mode);
+		s_Fb.transp.offset = 6;
 
 
 #endif  // CMAP256

@@ -55,8 +55,8 @@
 #include <CoreFoundation/CFUserNotification.h>
 #endif
 
-#define DEFAULT_RAM 6 /* MiB */
-#define MIN_RAM     6  /* MiB */
+#define DEFAULT_RAM (64+19) /* KiB */
+#define MIN_RAM     (64+19)  /* MiB */
 
 
 typedef struct atexit_listentry_s atexit_listentry_t;
@@ -114,7 +114,7 @@ static byte *AutoAllocMemory(int *size, int default_ram, int min_ram)
 
         // Try to allocate the zone memory.
 
-        *size = default_ram * 1024 * 1024;
+        *size = default_ram * 1024;
 
         zonemem = malloc(*size);
 
@@ -134,30 +134,13 @@ byte *I_ZoneBase (int *size)
 {
     byte *zonemem;
     int min_ram, default_ram;
-    int p;
 
-    //!
-    // @arg <mb>
-    //
-    // Specify the heap size, in MiB (default 16).
-    //
-
-    p = M_CheckParmWithArgs("-mb", 1);
-
-    if (p > 0)
-    {
-        default_ram = atoi(myargv[p+1]);
-        min_ram = default_ram;
-    }
-    else
-    {
-        default_ram = DEFAULT_RAM;
-        min_ram = MIN_RAM;
-    }
+    default_ram = DEFAULT_RAM;
+    min_ram = MIN_RAM;
 
     zonemem = AutoAllocMemory(size, default_ram, min_ram);
 
-    printf("zone memory: %p, %x allocated for zone\n", 
+    printf("zone memory: %p, %x bytes allocated for zone\n", 
            zonemem, *size);
 
     return zonemem;

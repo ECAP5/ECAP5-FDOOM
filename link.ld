@@ -24,7 +24,7 @@ OUTPUT_ARCH( "riscv" )
 ENTRY(main)
 MEMORY
 {
-  RAM (rwx) : ORIGIN = 0x0, LENGTH = 0x1A000
+  RAM (rwx) : ORIGIN = 0x0, LENGTH = 0x68000
   /* the flash is not memory mapped, but giving it an address
    * will help determine what needs to be loaded in ram */
   FLASH (r) : ORIGIN = 0x10000000, LENGTH = 0xD00000
@@ -33,21 +33,47 @@ SECTIONS
 {
   .text : { 
     *(.text) 
+    *(.text.*) 
   } > RAM AT > FLASH
 
   .rodata : {
     *(.rodata)
+    *(.rodata.*)
   } > RAM AT > FLASH
 
   .data : {
     *(.data)
+    *(.data.*)
     *(.sdata)
+    *(.sdata.*)
   } > RAM AT > FLASH
 
   .bss : {
     *(.bss)
+    *(.bss.*)
     *(.sbss)
+    *(.sbss.*)
   } > RAM AT > FLASH
 
-  _stack_top = ORIGIN(RAM) + LENGTH(RAM);
+  . = ALIGN(4);
+  _end = .;
+
+  . += 64K;
+
+  . = ORIGIN(RAM) + LENGTH(RAM) - 6K;
+  _stack_bottom = .;
+  . += 6K;
+  _stack_top = .;
+
+  /* The WAD file is not copied in RAM */
+  .wad : {
+    . = ALIGN(4);
+    _wad_virt_start = .;
+    KEEP(*(.wad))
+    _wad_virt_end = .;
+  } > FLASH
 }
+
+/* Offset from the elf address in flash which includes a 4K alignement */
+_wad_start = 0x1000 + LOADADDR(.wad) - ORIGIN(FLASH);
+_wad_size = _wad_virt_end - _wad_virt_start;

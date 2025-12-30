@@ -24,16 +24,16 @@
 
 // Screen width and height.
 
-#define SCREENWIDTH  320
-#define SCREENHEIGHT 200
+#define SCREENWIDTH  160
+#define SCREENHEIGHT 100
 
 // Screen width used for "squash" scale functions
 
-#define SCREENWIDTH_4_3 256
+#define SCREENWIDTH_4_3 127
 
 // Screen height used for "stretch" scale functions.
 
-#define SCREENHEIGHT_4_3 240
+#define SCREENHEIGHT_4_3 120
 
 #define MAX_MOUSE_BUTTONS 8
 

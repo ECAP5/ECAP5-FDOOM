@@ -656,7 +656,7 @@ R_SetViewSize
   int		detail )
 {
     setsizeneeded = true;
-    setblocks = blocks;
+    setblocks = 11;
     setdetail = detail;
 }
 

@@ -42,6 +42,31 @@ find_package(Python3 COMPONENTS Interpreter Development)
 
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/dependency.cmake)
 
+add_dependency(
+  GIT ecap5/squashware
+  TAG trunk)
+
+# Generate the WAD file
+
+set(WAD_FILE ${ecap5_squashware_SOURCE_DIR}/build/kernel/doom.wad)
+add_custom_command(
+  OUTPUT ${WAD_FILE}
+  COMMAND ${CMAKE_MAKE_PROGRAM} -C ${ecap5_squashware_SOURCE_DIR}
+  DEPENDS ${ecap5_squashware_SOURCE_DIR}/Makefile
+  COMMENT "Generating WAD file"
+  VERBATIM
+)
+
+# Generate WAD object file
+set(WAD_OBJECT ${CMAKE_CURRENT_BINARY_DIR}/wad.o)
+add_custom_command(
+  OUTPUT  ${WAD_OBJECT}
+  COMMAND riscv64-unknown-elf-objcopy -I binary -O elf32-littleriscv -B riscv --rename-section .data=.wad ${WAD_FILE} ${WAD_OBJECT}
+  DEPENDS ${WAD_FILE}
+)
+
+# Compile the doom elf
+
 set(CROSS_COMPILE riscv64-unknown-elf-)
 set(CMAKE_ASM_COMPILER  ${CROSS_COMPILE}gcc)
 set(CMAKE_AR            ${CROSS_COMPILE}ar)
@@ -52,16 +77,16 @@ set(CMAKE_CXX_COMPILER  ${CROSS_COMPILE}g++)
 enable_language(ASM)
 
 set(ARCH_FLAGS -march=rv32i -mabi=ilp32 -mcmodel=medany)
-set(COMMON_OPTS -Os -static -fvisibility=hidden)
+set(COMMON_OPTS -fstack-usage -Os -static -fvisibility=hidden -fno-ident -fno-asynchronous-unwind-tables -fno-unwind-tables -ffunction-sections -fdata-sections)
 add_compile_options(${ARCH_FLAGS} ${COMMON_OPTS})
 
 set(LD_SCRIPT ${CMAKE_CURRENT_LIST_DIR}/link.ld)
 
-set(INC_DIRS src src/core src/display src/game src/net src/render src/system src/wad)
+set(INC_DIRS include/)
 list(TRANSFORM INC_DIRS PREPEND "${CMAKE_CURRENT_LIST_DIR}/")
 file(GLOB_RECURSE SOURCES "src/*.c")
 
-add_executable(doom.elf ${SOURCES})
+add_executable(doom.elf ${SOURCES} ${WAD_OBJECT})
 target_include_directories(doom.elf PRIVATE ${INC_DIRS})
 target_link_options(doom.elf PRIVATE
   ${ARCH_FLAGS}

@@ -1963,41 +1963,41 @@ void M_Drawer (void)
     // Horiz. & Vertically center string and print it.
     if (messageToPrint)
     {
-	start = 0;
-	y = SCREENHEIGHT/2 - M_StringHeight(messageString) / 2;
-	while (messageString[start] != '\0')
-	{
-	    int foundnewline = 0;
+      start = 0;
+      y = SCREENHEIGHT/2 - M_StringHeight(messageString) / 2;
+      while (messageString[start] != '\0')
+      {
+          int foundnewline = 0;
 
-            for (i = 0; i < strlen(messageString + start); i++)
-            {
-                if (messageString[start + i] == '\n')
+                for (i = 0; i < strlen(messageString + start); i++)
                 {
-                    M_StringCopy(string, messageString + start,
-                                 sizeof(string));
-                    if (i < sizeof(string))
+                    if (messageString[start + i] == '\n')
                     {
-                        string[i] = '\0';
+                        M_StringCopy(string, messageString + start,
+                                     sizeof(string));
+                        if (i < sizeof(string))
+                        {
+                            string[i] = '\0';
+                        }
+
+                        foundnewline = 1;
+                        start += i + 1;
+                        break;
                     }
-
-                    foundnewline = 1;
-                    start += i + 1;
-                    break;
                 }
-            }
 
-            if (!foundnewline)
-            {
-                M_StringCopy(string, messageString + start, sizeof(string));
-                start += strlen(string);
-            }
+                if (!foundnewline)
+                {
+                    M_StringCopy(string, messageString + start, sizeof(string));
+                    start += strlen(string);
+                }
 
-	    x = SCREENWIDTH/2 - M_StringWidth(string) / 2;
-	    M_WriteText(x, y, string);
-	    y += SHORT(hu_font[0]->height);
-	}
+          x = SCREENWIDTH/2 - M_StringWidth(string) / 2;
+          M_WriteText(x, y, string);
+          y += SHORT(hu_font[0]->height);
+      }
 
-	return;
+      return;
     }
 
     //if (opldev)
@@ -2008,8 +2008,9 @@ void M_Drawer (void)
     if (!menuactive)
 	return;
 
-    if (currentMenu->routine)
-	currentMenu->routine();         // call Draw routine
+    if (currentMenu->routine) {
+      currentMenu->routine();         // call Draw routine
+    }
     
     // DRAW MENU
     x = currentMenu->x;
@@ -2020,11 +2021,11 @@ void M_Drawer (void)
     {
         name = DEH_String(currentMenu->menuitems[i].name);
 
-	if (name[0])
-	{
-	    V_DrawPatchDirect (x, y, W_CacheLumpName(name, PU_CACHE));
-	}
-	y += LINEHEIGHT;
+        if (name[0])
+        {
+            V_DrawPatchDirect (x, y, W_CacheLumpName(name, PU_CACHE));
+        }
+        y += LINEHEIGHT;
     }
 
     

@@ -480,9 +480,13 @@ void R_ProjectSprite (mobj_t* thing)
     
     tz = gxt-gyt; 
 
+    printf("Draw sprite\n");
+
     // thing is behind view plane?
     if (tz < MINZ)
 	return;
+
+    printf("Not clipped\n");
     
     xscale = FixedDiv(projection, tz);
 	
@@ -493,6 +497,8 @@ void R_ProjectSprite (mobj_t* thing)
     // too far off the side?
     if (abs(tx)>(tz<<2))
 	return;
+
+    printf("Not side\n");
     
     // decide which patch to use for sprite relative to player
 #ifdef RANGECHECK
@@ -510,26 +516,29 @@ void R_ProjectSprite (mobj_t* thing)
 
     if (sprframe->rotate)
     {
-	// choose a different rotation based on player view
-	ang = R_PointToAngle (thing->x, thing->y);
-	rot = (ang-thing->angle+(unsigned)(ANG45/2)*9)>>29;
-	lump = sprframe->lump[rot];
-	flip = (boolean)sprframe->flip[rot];
+      // choose a different rotation based on player view
+      ang = R_PointToAngle (thing->x, thing->y);
+      rot = (ang-thing->angle+(unsigned)(ANG45/2)*9)>>29;
+      lump = sprframe->lump[rot];
+      flip = (boolean)sprframe->flip[rot];
     }
     else
     {
-	// use single rotation for all views
-	lump = sprframe->lump[0];
-	flip = (boolean)sprframe->flip[0];
+      // use single rotation for all views
+      lump = sprframe->lump[0];
+      flip = (boolean)sprframe->flip[0];
     }
     
     // calculate edges of the shape
     tx -= spriteoffset[lump];	
     x1 = (centerxfrac + FixedMul (tx,xscale) ) >>FRACBITS;
 
+    printf("%d %d\n", x1, viewwidth);
     // off the right side?
     if (x1 > viewwidth)
 	return;
+
+    printf("Not side1\n");
     
     tx +=  spritewidth[lump];
     x2 = ((centerxfrac + FixedMul (tx,xscale) ) >>FRACBITS) - 1;
@@ -537,6 +546,8 @@ void R_ProjectSprite (mobj_t* thing)
     // off the left side
     if (x2 < 0)
 	return;
+
+    printf("Not side2\n");
     
     // store information in a vissprite
     vis = R_NewVisSprite ();
@@ -553,45 +564,45 @@ void R_ProjectSprite (mobj_t* thing)
 
     if (flip)
     {
-	vis->startfrac = spritewidth[lump]-1;
-	vis->xiscale = -iscale;
+      vis->startfrac = spritewidth[lump]-1;
+      vis->xiscale = -iscale;
     }
     else
     {
-	vis->startfrac = 0;
-	vis->xiscale = iscale;
+      vis->startfrac = 0;
+      vis->xiscale = iscale;
     }
 
     if (vis->x1 > x1)
-	vis->startfrac += vis->xiscale*(vis->x1-x1);
+      vis->startfrac += vis->xiscale*(vis->x1-x1);
     vis->patch = lump;
     
     // get light level
     if (thing->flags & MF_SHADOW)
     {
-	// shadow draw
-	vis->colormap = NULL;
+      // shadow draw
+      vis->colormap = NULL;
     }
     else if (fixedcolormap)
     {
-	// fixed map
-	vis->colormap = fixedcolormap;
+      // fixed map
+      vis->colormap = fixedcolormap;
     }
     else if (thing->frame & FF_FULLBRIGHT)
     {
-	// full bright
-	vis->colormap = colormaps;
+      // full bright
+      vis->colormap = colormaps;
     }
     
     else
     {
-	// diminished light
-	index = xscale>>(LIGHTSCALESHIFT-detailshift);
+      // diminished light
+      index = xscale>>(LIGHTSCALESHIFT-detailshift);
 
-	if (index >= MAXLIGHTSCALE) 
-	    index = MAXLIGHTSCALE-1;
+      if (index >= MAXLIGHTSCALE) 
+          index = MAXLIGHTSCALE-1;
 
-	vis->colormap = spritelights[index];
+      vis->colormap = spritelights[index];
     }	
 }
 

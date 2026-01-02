@@ -163,47 +163,44 @@ void cmap_to_fb(uint8_t *out, uint8_t *in, int in_pixels)
     {
         c = colors[*in];  // R:8 G:8 B:8
 
-        if (s_Fb.bits_per_pixel == 16)
-        {
-            // RGB565 packing
-            uint16_t p = ((c.r & 0xF8) << 8) |
-                         ((c.g & 0xFC) << 3) |
-                         (c.b >> 3);
-
-            for (k = 0; k < fb_scaling; k++) {
-                *(uint16_t *)out = p;
-                out += 2;
-            }
-        }
-        else if (s_Fb.bits_per_pixel == 32)
-        {
-            // Assuming RGBA8888
-            pix = (c.r << s_Fb.red.offset) |
-                  (c.g << s_Fb.green.offset) |
-                  (c.b << s_Fb.blue.offset);
-
-#ifdef SYS_BIG_ENDIAN
-            pix = swapLE32(pix);
-#endif
-            for (k = 0; k < fb_scaling; k++) {
-                *(uint32_t *)out = pix;
-                out += 4;
-            }
-        }
-        else if (s_Fb.bits_per_pixel == 8) {
-            uint8_t p = ((c.r & 0x3) << s_Fb.red.offset) |
-                        ((c.g & 0x3) << s_Fb.green.offset) |
-                        ((c.b & 0x3) << s_Fb.blue.offset) |
-                        (c.a & 0x3);
+//        if (s_Fb.bits_per_pixel == 16)
+//        {
+//            // RGB565 packing
+//            uint16_t p = ((c.r & 0xF8) << 8) |
+//                         ((c.g & 0xFC) << 3) |
+//                         (c.b >> 3);
+//
+//            for (k = 0; k < fb_scaling; k++) {
+//                *(uint16_t *)out = p;
+//                out += 2;
+//            }
+//        }
+//        else if (s_Fb.bits_per_pixel == 32)
+//        {
+//            // Assuming RGBA8888
+//            pix = (c.r << s_Fb.red.offset) |
+//                  (c.g << s_Fb.green.offset) |
+//                  (c.b << s_Fb.blue.offset);
+//
+//            for (k = 0; k < fb_scaling; k++) {
+//                *(uint32_t *)out = pix;
+//                out += 4;
+//            }
+//        }
+//        else if (s_Fb.bits_per_pixel == 8) {
+          
+            uint8_t p = (((c.r >> 5) & 0x7) << 5) |
+                        (((c.g >> 6) & 0x3) << 3) |
+                        ((c.b >> 5) & 0x7);
 
             for (k = 0; k < fb_scaling; k++) {
                 *(uint8_t *)out = p;
                 out += 1;
             }
-        } else {
-            // no clue how to convert this
-            I_Error("No idea how to convert %d bpp pixels", s_Fb.bits_per_pixel);
-        }
+//        } else {
+//            // no clue how to convert this
+//            I_Error("No idea how to convert %d bpp pixels", s_Fb.bits_per_pixel);
+//        }
 
         in++;
     }
@@ -238,7 +235,7 @@ void I_InitGraphics (void)
 //	}
 //
 //	if (strcmp(mode, "rgba8888") == 0) {
-//		// default mode
+		// default mode
 //		s_Fb.bits_per_pixel = 32;
 //
 //		s_Fb.blue.length = 8;
@@ -268,6 +265,7 @@ void I_InitGraphics (void)
 //	else
 //		I_Error("Unknown gfxmode value: %s\n", mode);
 
+      // rgb2222
 		s_Fb.bits_per_pixel = 8;
 
 		s_Fb.blue.length = 2;
@@ -292,22 +290,21 @@ void I_InitGraphics (void)
     printf("I_InitGraphics: DOOM screen size: w x h: %d x %d\n", SCREENWIDTH, SCREENHEIGHT);
 
 
-    i = M_CheckParmWithArgs("-scaling", 1);
-    if (i > 0) {
-        i = atoi(myargv[i + 1]);
-        fb_scaling = i;
-        printf("I_InitGraphics: Scaling factor: %d\n", fb_scaling);
-    } else {
-        fb_scaling = s_Fb.xres / SCREENWIDTH;
-        if (s_Fb.yres / SCREENHEIGHT < fb_scaling)
-            fb_scaling = s_Fb.yres / SCREENHEIGHT;
-        printf("I_InitGraphics: Auto-scaling factor: %d\n", fb_scaling);
-    }
-
+//    i = M_CheckParmWithArgs("-scaling", 1);
+//    if (i > 0) {
+//        i = atoi(myargv[i + 1]);
+//        fb_scaling = i;
+//        printf("I_InitGraphics: Scaling factor: %d\n", fb_scaling);
+//    } else {
+//        fb_scaling = s_Fb.xres / SCREENWIDTH;
+//        if (s_Fb.yres / SCREENHEIGHT < fb_scaling)
+//            fb_scaling = s_Fb.yres / SCREENHEIGHT;
+//        printf("I_InitGraphics: Auto-scaling factor: %d\n", fb_scaling);
+//    }
 
     /* Allocate screen to draw to */
 	I_VideoBuffer = (byte*)Z_Malloc (SCREENWIDTH * SCREENHEIGHT, PU_STATIC, NULL);  // For DOOM to draw on
-
+  
 	screenvisible = true;
 
     extern void I_InitInput(void);
@@ -363,23 +360,7 @@ void I_FinishUpdate (void)
         int i;
         for (i = 0; i < fb_scaling; i++) {
             line_out += x_offset;
-#ifdef CMAP256
-            if (fb_scaling == 1) {
-                memcpy(line_out, line_in, SCREENWIDTH); /* fb_width is bigger than Doom SCREENWIDTH... */
-            } else {
-                int j;
-
-                for (j = 0; j < SCREENWIDTH; j++) {
-                    int k;
-                    for (k = 0; k < fb_scaling; k++) {
-                        line_out[j * fb_scaling + k] = line_in[j];
-                    }
-                }
-            }
-#else
-            //cmap_to_rgb565((void*)line_out, (void*)line_in, SCREENWIDTH);
             cmap_to_fb((void*)line_out, (void*)line_in, SCREENWIDTH);
-#endif
             line_out += (SCREENWIDTH * fb_scaling * (s_Fb.bits_per_pixel/8)) + x_offset_end;
         }
         line_in += SCREENWIDTH;

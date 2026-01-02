@@ -33,8 +33,6 @@
 enum
 {
     PU_STATIC = 1,                  // static entire execution time
-    PU_SOUND,                       // static while playing
-    PU_MUSIC,                       // static while playing
     PU_FREE,                        // a free block
     PU_LEVEL,                       // static until level exited
     PU_LEVSPEC,                     // a special thinker in a level
@@ -43,6 +41,8 @@ enum
 
     PU_PURGELEVEL,
     PU_CACHE,
+    PU_SOUND,                       // static while playing
+    PU_MUSIC,                       // static while playing
 
     // Total number of different tag types
 

@@ -268,7 +268,7 @@ void P_LoadSectors (int lump)
     int			i;
     mapsector_t*	ms;
     sector_t*		ss;
-	
+
     numsectors = W_LumpLength (lump) / sizeof(mapsector_t);
     sectors = Z_Malloc (numsectors*sizeof(sector_t),PU_LEVEL,0);	
     memset (sectors, 0, numsectors*sizeof(sector_t));
@@ -750,6 +750,8 @@ P_SetupLevel
     int		i;
     char	lumpname[9];
     int		lumpnum;
+
+    printf("Setup level\n");
 	
     totalkills = totalitems = totalsecret = wminfo.maxfrags = 0;
     wminfo.partime = 180;
@@ -781,15 +783,17 @@ P_SetupLevel
     }
     else
     {
-	lumpname[0] = 'E';
-	lumpname[1] = '0' + episode;
-	lumpname[2] = 'M';
-	lumpname[3] = '0' + map;
-	lumpname[4] = 0;
+      lumpname[0] = 'E';
+      lumpname[1] = '0' + episode;
+      lumpname[2] = 'M';
+      lumpname[3] = '0' + map;
+      lumpname[4] = 0;
     }
 
+    printf("Loading level %s\n", lumpname);
+
     lumpnum = W_GetNumForName (lumpname);
-	
+
     leveltime = 0;
 	
     // note: most of this ordering is important	

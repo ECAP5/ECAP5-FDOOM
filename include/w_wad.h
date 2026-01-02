@@ -41,7 +41,6 @@ typedef struct lumpinfo_s lumpinfo_t;
 struct lumpinfo_s
 {
     char	name[8];
-    wad_file_t *wad_file;
     int		position;
     int		size;
     void       *cache;

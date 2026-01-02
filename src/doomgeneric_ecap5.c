@@ -5,7 +5,13 @@ void DG_Init() {
 }
 
 void DG_DrawFrame() {
-  printf("DRAW\n");
+  send_char("N");
+  send_char("E");
+  send_char("X");
+  send_char("T");
+  for(size_t i = 0; i < DOOMGENERIC_RESX * DOOMGENERIC_RESY; i++) {
+    send_char(&DG_ScreenBuffer[i]); 
+  }
 }
 
 #define TIMER_BASE 0x80000000
@@ -37,6 +43,8 @@ void DG_SetWindowTitle(const char * title) {
 
 extern int _wad_start;
 void main(void) {
+  // 3000000 baud -> 2891 incr
+  set_baudrate(111);
   int argc = 0;
   char * argv[] = {};
   doomgeneric_Create(argc, argv);

@@ -194,6 +194,8 @@ Z_Malloc
     memblock_t*	base;
     void *result;
 
+    Z_FreeTags(PU_CACHE, PU_CACHE);
+
     size = (size + MEM_ALIGN - 1) & ~(MEM_ALIGN - 1);
     
     // scan through the block list,
@@ -218,8 +220,9 @@ Z_Malloc
     {
         if (rover == start)
         {
+            Z_DumpHeap(PU_STATIC, PU_MUSIC);
             // scanned all the way around the list
-            I_Error ("Z_Malloc: failed on allocation of %i bytes", size);
+            I_Error ("Z_Malloc: failed on allocation of %i bytes, %d bytes remaining", size, Z_FreeMemory());
         }
 	
         if (rover->tag != PU_FREE)
@@ -359,39 +362,6 @@ Z_DumpHeap
 	    printf ("ERROR: two consecutive free blocks\n");
     }
 }
-
-
-//
-// Z_FileDumpHeap
-//
-void Z_FileDumpHeap (FILE* f)
-{
-    memblock_t*	block;
-	
-    fprintf (f,"zone size: %i  location: %p\n",mainzone->size,mainzone);
-	
-    for (block = mainzone->blocklist.next ; ; block = block->next)
-    {
-	fprintf (f,"block:%p    size:%7i    user:%p    tag:%3i\n",
-		 block, block->size, block->user, block->tag);
-		
-	if (block->next == &mainzone->blocklist)
-	{
-	    // all blocks have been hit
-	    break;
-	}
-	
-	if ( (byte *)block + block->size != (byte *)block->next)
-	    fprintf (f,"ERROR: block size does not touch the next block\n");
-
-	if ( block->next->prev != block)
-	    fprintf (f,"ERROR: next block doesn't have proper back link\n");
-
-	if (block->tag == PU_FREE && block->next->tag == PU_FREE)
-	    fprintf (f,"ERROR: two consecutive free blocks\n");
-    }
-}
-
 
 
 //

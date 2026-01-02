@@ -44,7 +44,7 @@ include(${CMAKE_CURRENT_LIST_DIR}/cmake/dependency.cmake)
 
 add_dependency(
   GIT ecap5/squashware
-  TAG trunk)
+  TAG newresolution)
 
 # Generate the WAD file
 

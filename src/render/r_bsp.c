@@ -101,6 +101,8 @@ R_ClipSolidWallSegment
     cliprange_t*	next;
     cliprange_t*	start;
 
+    printf("ClipSolidWallSegment\n");
+
     // Find the first range that touches the range
     //  (adjacent pixels are touching).
     start = solidsegs;
@@ -257,20 +259,30 @@ void R_AddLine (seg_t*	line)
     angle_t		angle2;
     angle_t		span;
     angle_t		tspan;
+
+    printf("Add line\n");
     
     curline = line;
 
     // OPTIMIZE: quickly reject orthogonal back sides.
     angle1 = R_PointToAngle (line->v1->x, line->v1->y);
     angle2 = R_PointToAngle (line->v2->x, line->v2->y);
-    
+
+    printf("v1x %d, v1y %d\n", line->v1->x, line->v1->y);
+    printf("v2x %d, v2y %d\n", line->v2->x, line->v2->y);
+    printf("angle1 %d, angle2 %d\n", angle1, angle2);
+
     // Clip to view edges.
     // OPTIMIZE: make constant out of 2*clipangle (FIELDOFVIEW).
     span = angle1 - angle2;
+
+    printf("Add line1.5 %d\n", span);
     
     // Back side? I.e. backface culling?
     if (span >= ANG180)
-	return;		
+      return;		
+
+    printf("Add line2\n");
 
     // Global angle needed by segcalc.
     rw_angle1 = angle1;
@@ -285,6 +297,8 @@ void R_AddLine (seg_t*	line)
 	// Totally off the left edge?
 	if (tspan >= span)
 	    return;
+
+    printf("Add line3\n");
 	
 	angle1 = clipangle;
     }
@@ -298,6 +312,8 @@ void R_AddLine (seg_t*	line)
 	    return;	
 	angle2 = -clipangle;
     }
+
+    printf("Add line4\n");
     
     // The seg is in the view range,
     // but not necessarily visible.
@@ -309,6 +325,8 @@ void R_AddLine (seg_t*	line)
     // Does not cross a pixel?
     if (x1 == x2)
 	return;				
+
+    printf("Add line5\n");
 	
     backsector = line->backsector;
 
@@ -338,13 +356,17 @@ void R_AddLine (seg_t*	line)
     {
 	return;
     }
+
+    printf("Add line6\n");
     
 				
   clippass:
+    printf("Add line7\n");
     R_ClipPassWallSegment (x1, x2-1);	
     return;
 		
   clipsolid:
+    printf("Add line8\n");
     R_ClipSolidWallSegment (x1, x2-1);
 }
 
@@ -500,6 +522,8 @@ void R_Subsector (int num)
 		 numsubsectors);
 #endif
 
+    printf("Subsector %d\n", num);
+
     sscount++;
     sub = &subsectors[num];
     frontsector = sub->sector;
@@ -508,29 +532,35 @@ void R_Subsector (int num)
 
     if (frontsector->floorheight < viewz)
     {
-	floorplane = R_FindPlane (frontsector->floorheight,
-				  frontsector->floorpic,
-				  frontsector->lightlevel);
+      floorplane = R_FindPlane (frontsector->floorheight,
+              frontsector->floorpic,
+              frontsector->lightlevel);
     }
     else
-	floorplane = NULL;
+      floorplane = NULL;
+
+    printf("floorplane %d\n", floorplane);
     
     if (frontsector->ceilingheight > viewz 
 	|| frontsector->ceilingpic == skyflatnum)
     {
-	ceilingplane = R_FindPlane (frontsector->ceilingheight,
-				    frontsector->ceilingpic,
-				    frontsector->lightlevel);
+      ceilingplane = R_FindPlane (frontsector->ceilingheight,
+                frontsector->ceilingpic,
+                frontsector->lightlevel);
     }
     else
-	ceilingplane = NULL;
-		
+      ceilingplane = NULL;
+
+    printf("ceiling plane %d\n", ceilingplane);
+
     R_AddSprites (frontsector);	
+
+    printf("count %d\n", count);
 
     while (count--)
     {
-	R_AddLine (line);
-	line++;
+      R_AddLine (line);
+      line++;
     }
 }
 
@@ -550,12 +580,14 @@ void R_RenderBSPNode (int bspnum)
     // Found a subsector?
     if (bspnum & NF_SUBSECTOR)
     {
-	if (bspnum == -1)			
-	    R_Subsector (0);
-	else
-	    R_Subsector (bspnum&(~NF_SUBSECTOR));
-	return;
+      if (bspnum == -1)			
+          R_Subsector (0);
+      else
+          R_Subsector (bspnum&(~NF_SUBSECTOR));
+      return;
     }
+
+    printf("Node %d\n", bspnum);
 		
     bsp = &nodes[bspnum];
     

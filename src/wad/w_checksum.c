@@ -28,6 +28,8 @@
 static wad_file_t **open_wadfiles = NULL;
 static int num_open_wadfiles = 0;
 
+extern wad_file_t * WAD_FILE;
+
 static int GetFileNumber(wad_file_t *handle)
 {
     int i;
@@ -60,7 +62,7 @@ static void ChecksumAddLump(sha1_context_t *sha1_context, lumpinfo_t *lump)
 
     M_StringCopy(buf, lump->name, sizeof(buf));
     SHA1_UpdateString(sha1_context, buf);
-    SHA1_UpdateInt32(sha1_context, GetFileNumber(lump->wad_file));
+    SHA1_UpdateInt32(sha1_context, GetFileNumber(WAD_FILE));
     SHA1_UpdateInt32(sha1_context, lump->position);
     SHA1_UpdateInt32(sha1_context, lump->size);
 }

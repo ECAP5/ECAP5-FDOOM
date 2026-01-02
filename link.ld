@@ -60,9 +60,9 @@ SECTIONS
 
   . += 64K;
 
-  . = ORIGIN(RAM) + LENGTH(RAM) - 6K;
+  . = ORIGIN(RAM) + LENGTH(RAM) - 4K;
   _stack_bottom = .;
-  . += 6K;
+  . += 4K;
   _stack_top = .;
 
   /* The WAD file is not copied in RAM */

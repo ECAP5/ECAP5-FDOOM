@@ -266,6 +266,8 @@ R_CheckPlane
     int		unionl;
     int		unionh;
     int		x;
+
+    printf("Checkplane\n");
 	
     if (start < pl->minx)
     {
@@ -365,6 +367,8 @@ void R_DrawPlanes (void)
     int			stop;
     int			angle;
     int                 lumpnum;
+
+    printf("DrawPlanes\n");
 				
 #ifdef RANGECHECK
     if (ds_p - drawsegs > MAXDRAWSEGS)
@@ -382,65 +386,71 @@ void R_DrawPlanes (void)
 
     for (pl = visplanes ; pl < lastvisplane ; pl++)
     {
-	if (pl->minx > pl->maxx)
-	    continue;
+      printf("DrawPlanes1 %d %d\n", pl->minx, pl->maxx);
+      if (pl->minx > pl->maxx)
+          continue;
 
+      printf("DrawPlanes2\n");
 	
-	// sky flat
-	if (pl->picnum == skyflatnum)
-	{
-	    dc_iscale = pspriteiscale>>detailshift;
-	    
-	    // Sky is allways drawn full bright,
-	    //  i.e. colormaps[0] is used.
-	    // Because of this hack, sky is not affected
-	    //  by INVUL inverse mapping.
-	    dc_colormap = colormaps;
-	    dc_texturemid = skytexturemid;
-	    for (x=pl->minx ; x <= pl->maxx ; x++)
-	    {
-		dc_yl = pl->top[x];
-		dc_yh = pl->bottom[x];
+      // sky flat
+      if (pl->picnum == skyflatnum)
+      {
+        dc_iscale = pspriteiscale>>detailshift;
+        
+        // Sky is allways drawn full bright,
+        //  i.e. colormaps[0] is used.
+        // Because of this hack, sky is not affected
+        //  by INVUL inverse mapping.
+        dc_colormap = colormaps;
+        dc_texturemid = skytexturemid;
+        for (x=pl->minx ; x <= pl->maxx ; x++)
+        {
+          dc_yl = pl->top[x];
+          dc_yh = pl->bottom[x];
 
-		if (dc_yl <= dc_yh)
-		{
-		    angle = (viewangle + xtoviewangle[x])>>ANGLETOSKYSHIFT;
-		    dc_x = x;
-		    dc_source = R_GetColumn(skytexture, angle);
-		    colfunc ();
-		}
-	    }
-	    continue;
-	}
+          if (dc_yl <= dc_yh)
+          {
+              angle = (viewangle + xtoviewangle[x])>>ANGLETOSKYSHIFT;
+              dc_x = x;
+              dc_source = R_GetColumn(skytexture, angle);
+              colfunc ();
+          }
+        }
+        continue;
+      }
 	
-	// regular flat
-        lumpnum = firstflat + flattranslation[pl->picnum];
-	ds_source = W_CacheLumpNum(lumpnum, PU_STATIC);
+      // regular flat
+            lumpnum = firstflat + flattranslation[pl->picnum];
+      ds_source = W_CacheLumpNum(lumpnum, PU_STATIC);
+
+      printf("DrawPlanes3\n");
+      
+      planeheight = abs(pl->height-viewz);
+      light = (pl->lightlevel >> LIGHTSEGSHIFT)+extralight;
+
+      if (light >= LIGHTLEVELS)
+          light = LIGHTLEVELS-1;
+
+      if (light < 0)
+          light = 0;
+
+      printf("DrawPlanes4 %d\n", light);
+
+      planezlight = zlight[light];
+
+      pl->top[pl->maxx+1] = 0xff;
+      pl->top[pl->minx-1] = 0xff;
+        
+      stop = pl->maxx + 1;
+
+      for (x=pl->minx ; x<= stop ; x++)
+      {
+          R_MakeSpans(x,pl->top[x-1],
+          pl->bottom[x-1],
+          pl->top[x],
+          pl->bottom[x]);
+      }
 	
-	planeheight = abs(pl->height-viewz);
-	light = (pl->lightlevel >> LIGHTSEGSHIFT)+extralight;
-
-	if (light >= LIGHTLEVELS)
-	    light = LIGHTLEVELS-1;
-
-	if (light < 0)
-	    light = 0;
-
-	planezlight = zlight[light];
-
-	pl->top[pl->maxx+1] = 0xff;
-	pl->top[pl->minx-1] = 0xff;
-		
-	stop = pl->maxx + 1;
-
-	for (x=pl->minx ; x<= stop ; x++)
-	{
-	    R_MakeSpans(x,pl->top[x-1],
-			pl->bottom[x-1],
-			pl->top[x],
-			pl->bottom[x]);
-	}
-	
-        W_ReleaseLumpNum(lumpnum);
+      W_ReleaseLumpNum(lumpnum);
     }
 }

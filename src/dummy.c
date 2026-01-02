@@ -86,6 +86,10 @@ void I_InitJoystick(void) {}
 void I_InitInput(void) {}
 void I_GetEvent(void) {}
 
+void ST_Drawer(void) {}
+void ST_Init(void) {}
+void ST_Start(void) {}
+
 #ifndef FEATURE_SOUND
 
 void I_InitTimidityConfig(void)

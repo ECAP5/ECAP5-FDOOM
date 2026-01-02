@@ -14,6 +14,11 @@ typedef struct {
   volatile unsigned int txdr;
 } uart_regs_t;
 
+void set_baudrate(unsigned int acc_incr) {
+  uart_regs_t * uart = (uart_regs_t *)UART_BASE;
+  uart->cr = (uart->cr & ~(0xFFFF << 16)) | ((acc_incr & 0xFFFF) << 16);
+}
+
 void send_char(char * c) {
   uart_regs_t * uart = (uart_regs_t *)UART_BASE;
 

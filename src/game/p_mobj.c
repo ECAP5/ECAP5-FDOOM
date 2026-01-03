@@ -682,10 +682,11 @@ void P_SpawnPlayer (mapthing_t* mthing)
     }
 
     // not playing?
-    if (!playeringame[mthing->type-1])
-	return;					
+//    if (!playeringame[mthing->type-1])
+//	return;					
 		
     p = &players[mthing->type-1];
+    printf("num player %d\n", mthing->type-1);
 
     if (p->playerstate == PST_REBORN)
 	G_PlayerReborn (mthing->type-1);
@@ -712,6 +713,8 @@ void P_SpawnPlayer (mapthing_t* mthing)
     p->extralight = 0;
     p->fixedcolormap = 0;
     p->viewheight = VIEWHEIGHT;
+
+    printf("spawn player %p %d %d\n", p, p->mo->x, p->mo->y);
 
     // setup gun psprite
     P_SetupPsprites (p);

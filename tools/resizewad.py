@@ -9,21 +9,22 @@ def resize_by_half(input_folder, output_folder):
         if filename.lower().endswith(('.png', '.bmp')):
             path = os.path.join(input_folder, filename)
             with Image.open(path) as img:
-                # Calcul de la nouvelle taille (Division par 2)
+                # Calculate new size (Divide by 2)
                 new_width = max(1, img.width // 2)
                 new_height = max(1, img.height // 2)
-                
-                # Conversion RGB puis redimensionnement sans lissage
+
+                # Convert to RGB then resize without smoothing (Nearest Neighbor)
                 img = img.convert("RGB")
                 img = img.resize((new_width, new_height), Image.NEAREST)
-                
-                # Conversion finale en Palette 8-bits
+
+                # Final conversion to 8-bit Palette
                 img = img.convert("P", palette=Image.ADAPTIVE, colors=256)
-                
+
                 output_path = os.path.join(output_folder, filename)
                 img.save(output_path, "PNG", optimize=True)
-                
-                print(f"{filename:15} : {img.width}x{img.height} -> {new_width}x{new_height}")
+
+                print(f"{filename:15} : Original {img.width * 2}x{img.height * 2} -> New {new_width}x{new_height}")
 
 if __name__ == "__main__":
+    # Example usage: resize_by_half("input_dir", "output_dir")
     resize_by_half("graphics_original", "graphics")

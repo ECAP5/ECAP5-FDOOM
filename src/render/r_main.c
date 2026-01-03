@@ -40,7 +40,7 @@
 
 
 // Fineangles in the SCREENWIDTH wide window.
-#define FIELDOFVIEW		2048	
+#define FIELDOFVIEW		512	
 
 
 
@@ -279,7 +279,7 @@ R_PointToAngle
 {	
     x -= viewx;
     y -= viewy;
-    
+
     if ( (!x) && (!y) )
 	return 0;
 
@@ -675,16 +675,16 @@ void R_ExecuteSetViewSize (void)
 
     setsizeneeded = false;
 
-    if (setblocks == 11)
-    {
+//    if (setblocks == 11)
+//    {
 	scaledviewwidth = SCREENWIDTH;
 	viewheight = SCREENHEIGHT;
-    }
-    else
-    {
-	scaledviewwidth = setblocks*32;
-	viewheight = (setblocks*168/10)&~7;
-    }
+//    }
+//    else
+//    {
+//	scaledviewwidth = setblocks*32;
+//	viewheight = (setblocks*168/10)&~7;
+//    }
     
     detailshift = setdetail;
     viewwidth = scaledviewwidth>>detailshift;

@@ -44,7 +44,7 @@
 #define MAXHEIGHT			416
 
 // status bar height at bottom of screen
-#define SBARHEIGHT		16
+#define SBARHEIGHT		1
 
 //
 // All drawing to the view buffer is accomplished in this file.
@@ -113,7 +113,7 @@ void R_DrawColumn (void)
     // Zero length, column does not exceed a pixel.
     if (count < 0) 
 	return; 
-				 
+
 #ifdef RANGECHECK 
     if ((unsigned)dc_x >= SCREENWIDTH
 	|| dc_yl < 0
@@ -126,6 +126,7 @@ void R_DrawColumn (void)
     // Use columnofs LUT for subwindows? 
     dest = ylookup[dc_yl] + columnofs[dc_x];  
 
+
     // Determine scaling,
     //  which is the only mapping to be done.
     fracstep = dc_iscale; 
@@ -136,14 +137,21 @@ void R_DrawColumn (void)
     // This is as fast as it gets.
     do 
     {
-	// Re-map color indices from wall texture column
-	//  using a lighting/special effects LUT.
-	*dest = dc_colormap[dc_source[(frac>>FRACBITS)&127]];
-	
-	dest += SCREENWIDTH; 
-	frac += fracstep;
+      // Re-map color indices from wall texture column
+      //  using a lighting/special effects LUT.
+//      *dest = dc_colormap[dc_source[(frac>>FRACBITS)&127]];
+      *dest = 15;
+      
+      dest += SCREENWIDTH; 
+      frac += fracstep;
 	
     } while (count--); 
+
+    for(int i=0; i<10; i++) {
+        for(int j=0; j<10; j++) {
+             ylookup[dc_yl+i][dc_x+j] = 15;
+        }
+    }
 } 
 
 

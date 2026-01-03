@@ -470,7 +470,7 @@ void R_ProjectSprite (mobj_t* thing)
     
     angle_t		ang;
     fixed_t		iscale;
-    
+
     // transform the origin point
     tr_x = thing->x - viewx;
     tr_y = thing->y - viewy;
@@ -480,14 +480,10 @@ void R_ProjectSprite (mobj_t* thing)
     
     tz = gxt-gyt; 
 
-    printf("Draw sprite\n");
-
     // thing is behind view plane?
     if (tz < MINZ)
 	return;
 
-    printf("Not clipped\n");
-    
     xscale = FixedDiv(projection, tz);
 	
     gxt = -FixedMul(tr_x,viewsin); 
@@ -498,8 +494,6 @@ void R_ProjectSprite (mobj_t* thing)
     if (abs(tx)>(tz<<2))
 	return;
 
-    printf("Not side\n");
-    
     // decide which patch to use for sprite relative to player
 #ifdef RANGECHECK
     if ((unsigned int) thing->sprite >= (unsigned int) numsprites)
@@ -533,13 +527,10 @@ void R_ProjectSprite (mobj_t* thing)
     tx -= spriteoffset[lump];	
     x1 = (centerxfrac + FixedMul (tx,xscale) ) >>FRACBITS;
 
-    printf("%d %d\n", x1, viewwidth);
     // off the right side?
     if (x1 > viewwidth)
 	return;
 
-    printf("Not side1\n");
-    
     tx +=  spritewidth[lump];
     x2 = ((centerxfrac + FixedMul (tx,xscale) ) >>FRACBITS) - 1;
 
@@ -547,8 +538,6 @@ void R_ProjectSprite (mobj_t* thing)
     if (x2 < 0)
 	return;
 
-    printf("Not side2\n");
-    
     // store information in a vissprite
     vis = R_NewVisSprite ();
     vis->mobjflags = thing->flags;

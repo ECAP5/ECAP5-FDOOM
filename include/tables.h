@@ -43,7 +43,7 @@
 
 
 // 0x100000000 to 0x2000
-#define ANGLETOFINESHIFT	15
+#define ANGLETOFINESHIFT	21
 
 // Effective size is 10240.
 extern const fixed_t finesine[5*FINEANGLES/4];

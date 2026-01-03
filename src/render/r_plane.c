@@ -267,8 +267,6 @@ R_CheckPlane
     int		unionh;
     int		x;
 
-    printf("Checkplane\n");
-	
     if (start < pl->minx)
     {
 	intrl = pl->minx;
@@ -368,8 +366,6 @@ void R_DrawPlanes (void)
     int			angle;
     int                 lumpnum;
 
-    printf("DrawPlanes\n");
-				
 #ifdef RANGECHECK
     if (ds_p - drawsegs > MAXDRAWSEGS)
 	I_Error ("R_DrawPlanes: drawsegs overflow (%i)",
@@ -386,11 +382,8 @@ void R_DrawPlanes (void)
 
     for (pl = visplanes ; pl < lastvisplane ; pl++)
     {
-      printf("DrawPlanes1 %d %d\n", pl->minx, pl->maxx);
       if (pl->minx > pl->maxx)
           continue;
-
-      printf("DrawPlanes2\n");
 	
       // sky flat
       if (pl->picnum == skyflatnum)
@@ -423,8 +416,6 @@ void R_DrawPlanes (void)
             lumpnum = firstflat + flattranslation[pl->picnum];
       ds_source = W_CacheLumpNum(lumpnum, PU_STATIC);
 
-      printf("DrawPlanes3\n");
-      
       planeheight = abs(pl->height-viewz);
       light = (pl->lightlevel >> LIGHTSEGSHIFT)+extralight;
 
@@ -433,8 +424,6 @@ void R_DrawPlanes (void)
 
       if (light < 0)
           light = 0;
-
-      printf("DrawPlanes4 %d\n", light);
 
       planezlight = zlight[light];
 

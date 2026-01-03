@@ -189,14 +189,16 @@ void cmap_to_fb(uint8_t *out, uint8_t *in, int in_pixels)
 //        }
 //        else if (s_Fb.bits_per_pixel == 8) {
           
-            uint8_t p = (((c.r >> 5) & 0x7) << 5) |
-                        (((c.g >> 6) & 0x3) << 3) |
-                        ((c.b >> 5) & 0x7);
+//            uint8_t p = (((c.r >> 5) & 0x7) << 5) |
+//                        (((c.g >> 6) & 0x3) << 3) |
+//                        ((c.b >> 5) & 0x7);
+            uint8_t p = 0.2126 * c.r + 0.7152 * c.g + 0.0722 * c.b;
 
             for (k = 0; k < fb_scaling; k++) {
                 *(uint8_t *)out = p;
                 out += 1;
             }
+
 //        } else {
 //            // no clue how to convert this
 //            I_Error("No idea how to convert %d bpp pixels", s_Fb.bits_per_pixel);
@@ -265,18 +267,18 @@ void I_InitGraphics (void)
 //	else
 //		I_Error("Unknown gfxmode value: %s\n", mode);
 
-      // rgb2222
+      // rgb323
 		s_Fb.bits_per_pixel = 8;
 
-		s_Fb.blue.length = 2;
+		s_Fb.blue.length = 3;
 		s_Fb.green.length = 2;
-		s_Fb.red.length = 2;
-		s_Fb.transp.length = 2;
+		s_Fb.red.length = 3;
+		s_Fb.transp.length = 0;
 
-		s_Fb.blue.offset = 4;
-		s_Fb.green.offset = 2;
+		s_Fb.blue.offset = 5;
+		s_Fb.green.offset = 3;
 		s_Fb.red.offset = 0;
-		s_Fb.transp.offset = 6;
+		s_Fb.transp.offset = 0;
 
 
 #endif  // CMAP256
@@ -353,6 +355,18 @@ void I_FinishUpdate (void)
     line_in  = (unsigned char *) I_VideoBuffer;
     line_out = (unsigned char *) DG_ScreenBuffer;
 
+//    for(int j = 0; j < SCREENHEIGHT; j++) {
+//      for(int i = 0; i < SCREENWIDTH; i++) {
+//        if(line_in[j * SCREENWIDTH + i] != 0) {
+//          printf("GAGNE\n");
+//        }
+//      }
+//    }
+    
+//    for (int i = 0; i < 256; i++) {
+//    DrawPixel(i, 0, palette[i]); // Dessine chaque couleur de la palette sur une ligne
+//}
+
     y = SCREENHEIGHT;
 
     while (y--)
@@ -388,7 +402,7 @@ void I_ReadScreen (byte* scr)
 void I_SetPalette (byte* palette)
 {
 	int i;
-	//col_t* c;
+col_t* c;
 
 	//for (i = 0; i < 256; i++)
 	//{
@@ -401,16 +415,26 @@ void I_SetPalette (byte* palette)
 	//	palette += 3;
 	//}
     
+  for (i = 0; i < 256; i++) {
+    c = (col_t*) palette;
+
+    colors[i].a = 0;
+    colors[i].r = gammatable[usegamma][c->r];
+    colors[i].g = gammatable[usegamma][c->g];
+    colors[i].b = gammatable[usegamma][c->b];
+
+    palette += 3;
+  }
 
     /* performance boost:
      * map to the right pixel format over here! */
 
-    for (i=0; i<256; ++i ) {
-        colors[i].a = 0;
-        colors[i].r = gammatable[usegamma][*palette++];
-        colors[i].g = gammatable[usegamma][*palette++];
-        colors[i].b = gammatable[usegamma][*palette++];
-    }
+//    for (i=0; i<256; ++i ) {
+//        colors[i].a = 0;
+//        colors[i].r = gammatable[usegamma][*palette++];
+//        colors[i].g = gammatable[usegamma][*palette++];
+//        colors[i].b = gammatable[usegamma][*palette++];
+//    }
 
 #ifdef CMAP256
 
@@ -426,8 +450,6 @@ int I_GetPaletteIndex (int r, int g, int b)
     int best, best_diff, diff;
     int i;
     col_t color;
-
-    printf("I_GetPaletteIndex\n");
 
     best = 0;
     best_diff = INT_MAX;

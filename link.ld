@@ -75,5 +75,5 @@ SECTIONS
 }
 
 /* Offset from the elf address in flash which includes a 4K alignement */
-_wad_start = 0x1000 + LOADADDR(.wad) - ORIGIN(FLASH);
+_wad_start = 0x2000 + LOADADDR(.wad) - ORIGIN(FLASH);
 _wad_size = _wad_virt_end - _wad_virt_start;

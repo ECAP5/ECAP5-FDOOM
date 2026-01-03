@@ -454,6 +454,8 @@ void D_DoomLoop (void)
 
     D_StartGameLoop();
 
+    I_SetPalette (W_CacheLumpName (DEH_String("PLAYPAL"),PU_CACHE));
+
     if (testcontrols)
     {
         wipegamestate = gamestate;

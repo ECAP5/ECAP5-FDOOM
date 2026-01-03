@@ -5,13 +5,13 @@ import time
 import serial
 
 # --- CONFIGURATION ---
-FTDI_URL = 'ftdi://ftdi:232r/1' 
+FTDI_URL = 'ftdi://ftdi:232r/1'
 BAUD_RATE = 115200
 
-WIDTH, HEIGHT = 160, 100 # 6000 pixels
+WIDTH, HEIGHT = 160, 100 # 16,000 pixels
 EXPECTED_BYTES = WIDTH * HEIGHT
 
-# Initialisation Pygame
+# Pygame Initialization
 pygame.init()
 screen = pygame.display.set_mode((WIDTH * 6, HEIGHT * 6))
 pygame.display.set_caption("ECP5 Doom Debug via FTDI")
@@ -50,9 +50,10 @@ def greyscale_to_rgb888(raw_bytes):
 
 def rgb8888(raw_bytes):
     data32 = np.frombuffer(raw_bytes, dtype=np.uint32)
-    r = ((data8 >> 24) & 0xFF)
-    g = ((data8 >> 16) & 0xFF)
-    b = ((data8 >> 8) & 0xFF)
+    # Note: Fixed potential typo from original (data8 -> data32)
+    r = ((data32 >> 24) & 0xFF)
+    g = ((data32 >> 16) & 0xFF)
+    b = ((data32 >> 8) & 0xFF)
     rgb = np.stack((r, g, b), axis=-1).astype(np.uint8)
     return rgb.reshape((HEIGHT, WIDTH, 3))
 
@@ -60,43 +61,42 @@ def main():
     try:
         port = pyftdi.serialext.serial_for_url(FTDI_URL, baudrate=BAUD_RATE, bytesize=serial.EIGHTBITS, parity=serial.PARITY_NONE, stopbits=serial.STOPBITS_ONE)
         print(f"Connected to {FTDI_URL}")
-        
+
         buffer = b""
         running = True
-        first_next = False
-        
+
         while running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
 
-
-            # Lecture par petits blocs pour ne pas saturer
-            data = port.read(2*EXPECTED_BYTES)
+            # Read in small blocks to avoid overflow
+            data = port.read(2 * EXPECTED_BYTES)
             if data:
                 buffer = data
 
-            # On cherche "NEXT" dans le buffer
+            # Search for "NEXT" keyword in the buffer (frame delimiter)
             if b"NEXT" in buffer:
                 parts = buffer.split(b"NEXT")
                 if(len(parts) > 2):
                     part = parts[1]
 
-                    # Si on a assez d'octets après le mot NEXT
+                    # Ensure we have enough bytes after the "NEXT" tag
                     raw_frame = part + bytes([0 for x in range(EXPECTED_BYTES - len(part))])
 
-                    print(raw_frame[0])
+                    print(f"First byte of frame: {raw_frame[0]}")
 
-                    # Mise à jour graphique
-                    img_array = rgb323_to_rgb888(raw_frame)
+                    # Graphic Update
+                    img_array = greyscale_to_rgb888(raw_frame)
                     surface = pygame.surfarray.make_surface(img_array.swapaxes(0, 1))
                     screen.blit(pygame.transform.scale(surface, screen.get_size()), (0, 0))
                     pygame.display.flip()
-                        
-                # On vide ce qu'on a traité du buffer
+
+                # Clear processed buffer
                 buffer = b""
 
     except Exception as e:
+        print(f"Error: {e}")
         raise
     finally:
         pygame.quit()
